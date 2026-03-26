@@ -59,55 +59,25 @@ export default function PlayPage() {
 
   if (isLoading || !gameState) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-purple-600 via-purple-500 to-cyan-500 flex items-center justify-center relative overflow-hidden">
-        {/* Decorative background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="waves" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <path d="M0,50 Q25,30 50,50 T100,50" stroke="white" strokeWidth="0.5" fill="none" opacity="0.3"/>
-                <path d="M0,60 Q25,40 50,60 T100,60" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2"/>
-                <path d="M0,40 Q25,20 50,40 T100,40" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#waves)" />
-          </svg>
-        </div>
-        <div className="text-center relative z-10">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg font-medium">Loading your bingo card...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading your bingo card...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-600 via-purple-500 to-cyan-500 py-8 relative overflow-hidden">
-      {/* Decorative background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="waves-play" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-              <path d="M0,50 Q25,30 50,50 T100,50" stroke="white" strokeWidth="0.5" fill="none" opacity="0.3"/>
-              <path d="M0,60 Q25,40 50,60 T100,60" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2"/>
-              <path d="M0,40 Q25,20 50,40 T100,40" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#waves-play)" />
-        </svg>
-      </div>
-
-      <div className="container mx-auto relative z-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
+      <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <p className="text-white/90 text-sm mb-1">
-            <span className="font-light">geeks</span> <span className="font-bold text-yellow-400">&&</span> <span className="text-yellow-400 font-mono">{'{...}'}</span>
-          </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Networking Bingo
           </h1>
-          <p className="text-white/80 text-sm italic">
-            innovation / ethics / impact
+          <p className="text-gray-600">
+            Alamo Tech Collective × Geeks && {'{...}'}
           </p>
         </div>
 
@@ -124,7 +94,7 @@ export default function PlayPage() {
                 router.push('/');
               }
             }}
-            className="px-6 py-2 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white rounded-lg hover:bg-white/30 transition-colors"
+            className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
             New Game
           </button>
