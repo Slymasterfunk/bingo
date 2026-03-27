@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { GameState } from '@/lib/types';
 import { generateUUID, generateRandomCard, generateInitialCardState } from '@/lib/utils';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -86,6 +87,12 @@ export default function PlayPage() {
 
         {/* Bottom actions */}
         <div className="flex justify-center gap-4 mt-8">
+          <Link
+            href="/leaderboard"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
+          >
+            View Leaderboard
+          </Link>
           <button
             onClick={() => {
               if (confirm('Are you sure you want to start a new game? Your current progress will be lost.')) {

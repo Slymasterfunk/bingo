@@ -416,16 +416,16 @@ function checkForWin(cardState: SquareState[]): {
 ### Phase 1: MVP (Core Functionality)
 **Goal:** Get basic game working locally
 
-- [ ] Initialize Next.js project with TypeScript + Tailwind
-- [ ] Create card randomization utility (`generateRandomCard()`)
-- [ ] Create bingo grid component (5×5)
-- [ ] Implement square tap → modal → name input
-- [ ] Mark square as completed
-- [ ] Free space (index 12) auto-marked on all randomized cards
-- [ ] localStorage persistence (including randomized card order)
-- [ ] Win detection (client-side)
-- [ ] Basic styling
-- [ ] Test that cards are actually randomized (no two the same)
+- [X] Initialize Next.js project with TypeScript + Tailwind
+- [X] Create card randomization utility (`generateRandomCard()`)
+- [X] Create bingo grid component (5×5)
+- [X] Implement square tap → modal → name input
+- [X] Mark square as completed
+- [X] Free space (index 12) auto-marked on all randomized cards
+- [X] localStorage persistence (including randomized card order)
+- [X] Win detection (client-side)
+- [X] Basic styling
+- [X] Test that cards are actually randomized (no two the same)
 
 **Deliverable:** Playable bingo game (no leaderboard yet)
 

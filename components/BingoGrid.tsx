@@ -16,28 +16,115 @@ interface BingoGridProps {
 export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridProps) {
   const [selectedSquare, setSelectedSquare] = useState<SquareState | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMessage, setCelebrationMessage] = useState('');
   const [winningPatterns, setWinningPatterns] = useState<number[][]>([]);
 
   const completedSquares = getCompletedSquares(gameState.cardState);
 
-  // Check for wins whenever card state changes
+  // Update progress on server whenever card state changes
+  useEffect(() => {
+    const updateProgress = async () => {
+      try {
+        await fetch('/api/update-progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            playerId: gameState.playerId,
+            playerName: gameState.playerName,
+            completedSquares,
+            hasRow: gameState.hasClaimedRow,
+            hasBlackout: gameState.hasClaimedBlackout,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to update progress:', error);
+      }
+    };
+
+    updateProgress();
+  }, [completedSquares, gameState.playerId, gameState.playerName, gameState.hasClaimedRow, gameState.hasClaimedBlackout]);
+
+  // Check for wins and claim prizes
   useEffect(() => {
     const winResult = checkForWin(gameState.cardState);
 
     // Update winning patterns for UI highlighting
     setWinningPatterns(getAllWinningPatterns(gameState.cardState));
 
-    // Show celebration if player just won
-    if (winResult.hasRow && !gameState.hasClaimedRow) {
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 5000);
+    // Claim first row prize
+    if (winResult.hasRow && !gameState.hasClaimedRow && winResult.winningPattern) {
+      claimRowPrize(winResult.winningPattern);
     }
 
+    // Claim blackout prize
     if (winResult.hasBlackout && !gameState.hasClaimedBlackout) {
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 8000);
+      claimBlackoutPrize();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.cardState, gameState.hasClaimedRow, gameState.hasClaimedBlackout]);
+
+  const claimRowPrize = async (winningPattern: number[]) => {
+    try {
+      const response = await fetch('/api/submit-row', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerId: gameState.playerId,
+          playerName: gameState.playerName,
+          cardState: gameState.cardState,
+          winningPattern,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.isWinner) {
+        setCelebrationMessage(data.message);
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 8000);
+        onUpdateGameState({ hasClaimedRow: true });
+      } else if (data.success === false) {
+        // Someone else won
+        setCelebrationMessage(`Nice try! ${data.message}`);
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 5000);
+        onUpdateGameState({ hasClaimedRow: true });
+      }
+    } catch (error) {
+      console.error('Failed to claim row prize:', error);
+    }
+  };
+
+  const claimBlackoutPrize = async () => {
+    try {
+      const response = await fetch('/api/submit-blackout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerId: gameState.playerId,
+          playerName: gameState.playerName,
+          cardState: gameState.cardState,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.isWinner) {
+        setCelebrationMessage(data.message);
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 10000);
+        onUpdateGameState({ hasClaimedBlackout: true });
+      } else if (data.success === false) {
+        // Someone else won
+        setCelebrationMessage(`Nice try! ${data.message}`);
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 5000);
+        onUpdateGameState({ hasClaimedBlackout: true });
+      }
+    } catch (error) {
+      console.error('Failed to claim blackout prize:', error);
+    }
+  };
 
   const handleSquareClick = (square: SquareState) => {
     if (square.prompt === "FREE SPACE") return;
@@ -80,7 +167,7 @@ export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridPro
       {showCelebration && (
         <div className="mb-4 p-4 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg text-center animate-pulse">
           <p className="text-xl font-bold text-gray-900">
-            🎉 Congratulations! You got a line! 🎉
+            {celebrationMessage || '🎉 Congratulations! You got a line! 🎉'}
           </p>
         </div>
       )}
