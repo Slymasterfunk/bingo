@@ -16,7 +16,7 @@ export async function GET() {
       0,
       -1,
       { rev: true } // Reverse order (highest scores first)
-    );
+    ) as string[];
 
     // Fetch player data for each ID in leaderboard
     const players: PlayerProgress[] = [];
