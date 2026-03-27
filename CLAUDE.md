@@ -96,7 +96,7 @@ Build an interactive networking bingo web app for an Alamo Tech Collective × Ge
 - **Route:** `/admin`
 - **Security:**
   - Password-protected (environment variable)
-  - IP whitelisting via middleware
+  - IP whitelisting via proxy (Next.js request interceptor)
   - Dual-layer authentication
 - **Dashboard Tabs:**
   - **Overview:** Real-time stats, prize winners, top 5 players
@@ -224,7 +224,7 @@ networking-bingo/
 │   ├── card-randomization.spec.ts    # ✅ Randomization tests (7 tests)
 │   ├── helpers.ts                    # ✅ Test utilities
 │   └── README.md                     # ✅ Test documentation
-├── middleware.ts                     # ✅ IP whitelisting for admin routes
+├── proxy.ts                          # ✅ IP whitelisting for admin routes (Next.js 16+)
 ├── .env.example                      # ✅ Environment variable template
 ├── .env.local                        # ✅ Local environment variables
 ├── playwright.config.ts              # ✅ Playwright configuration
@@ -679,10 +679,10 @@ console.log(card1[12] === card2[12]); // Should be true (both "FREE SPACE")
 1. User visits `/admin` → Login page with password prompt
 2. Password checked against `ADMIN_PASSWORD` environment variable
 3. If correct → Session stored in `sessionStorage`, redirect to dashboard
-4. Middleware checks IP whitelist on every request to `/admin/*`
+4. Proxy (Next.js request interceptor) checks IP whitelist on every request to `/admin/*`
 5. If IP not whitelisted → Redirect to `/admin/unauthorized`
 
-**IP Whitelisting (middleware.ts):**
+**IP Whitelisting (proxy.ts):**
 ```typescript
 // Extracts IP from multiple header sources
 function getClientIP(request: NextRequest): string | null {
@@ -692,8 +692,8 @@ function getClientIP(request: NextRequest): string | null {
   // ... additional checks
 }
 
-// Middleware intercepts /admin/* routes
-export function middleware(request: NextRequest) {
+// Proxy intercepts /admin/* routes (Next.js 16+ renamed from middleware)
+export default function proxy(request: NextRequest) {
   if (pathname.startsWith('/admin')) {
     const whitelist = process.env.ADMIN_IP_WHITELIST?.split(',');
     if (!isIPWhitelisted(clientIP, whitelist)) {
@@ -722,7 +722,7 @@ export function middleware(request: NextRequest) {
 
 **Security Layers:**
 1. Password authentication (environment variable)
-2. IP whitelisting (middleware)
+2. IP whitelisting (proxy/request interceptor)
 3. Session-based auth (sessionStorage)
 4. Confirmation dialogs for destructive actions
 5. Server-side validation on all admin operations

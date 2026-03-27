@@ -45,7 +45,7 @@ function isIPWhitelisted(clientIP: string | null, whitelist: string[]): boolean 
   });
 }
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only apply IP whitelisting to admin routes
@@ -88,7 +88,7 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configure which routes use this middleware
+// Configure which routes use this proxy
 export const config = {
   matcher: [
     '/admin/:path*',
