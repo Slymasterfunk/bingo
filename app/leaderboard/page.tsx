@@ -13,6 +13,7 @@ export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   const fetchLeaderboard = async () => {
     try {
@@ -32,8 +33,63 @@ export default function LeaderboardPage() {
   };
 
   useEffect(() => {
-    // ✅ PERFORMANCE: Initial fetch only, NO auto-refresh
-    fetchLeaderboard();
+    // Connect to SSE endpoint for real-time updates
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
+
+    const connect = () => {
+      try {
+        eventSource = new EventSource('/api/leaderboard/stream');
+
+        eventSource.onopen = () => {
+          console.log('SSE connection established');
+          setIsConnected(true);
+          setError(null);
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+
+            if (message.type === 'initial' || message.type === 'update') {
+              setData(message.data);
+              setLoading(false);
+            }
+          } catch (err) {
+            console.error('Error parsing SSE message:', err);
+          }
+        };
+
+        eventSource.onerror = (err) => {
+          console.error('SSE connection error:', err);
+          setIsConnected(false);
+          eventSource?.close();
+
+          // Attempt to reconnect after 5 seconds
+          reconnectTimeout = setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            connect();
+          }, 5000);
+        };
+      } catch (err) {
+        console.error('Error creating EventSource:', err);
+        setError('Failed to connect to real-time updates');
+        setLoading(false);
+      }
+    };
+
+    // Initial connection
+    connect();
+
+    // Cleanup on unmount
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+    };
   }, []);
 
   if (loading && !data) {
@@ -71,17 +127,19 @@ export default function LeaderboardPage() {
           <h1 className="page-header__title">
             Leaderboard
           </h1>
-          <p className="page-header__subtitle">
-            Real-time standings
-          </p>
-          <div className="page-header__actions">
-            <button
-              onClick={fetchLeaderboard}
-              disabled={loading}
-              className="btn btn--blue"
-            >
-              {loading ? 'Refreshing...' : '🔄 Refresh'}
-            </button>
+          <div className="page-header__info">
+            <p className="page-header__subtitle">
+              {isConnected ? '🟢 Live updates' : '🔴 Reconnecting...'}
+            </p>
+            <div className="page-header__actions">
+              <button
+                onClick={fetchLeaderboard}
+                disabled={loading}
+                className="btn btn--blue"
+              >
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -106,7 +164,7 @@ export default function LeaderboardPage() {
           </div>
 
           {/* Blackout Winner */}
-          <div className="winner-card winner-card--purple">
+          <div className="winner-card">
             <div className="winner-card__header">
               <span className="icon">🎊</span>
               <h2 className="title">Blackout</h2>

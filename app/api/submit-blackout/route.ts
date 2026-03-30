@@ -49,6 +49,16 @@ export async function POST(request: Request) {
     winners.blackout = winner;
     await redis.set(RedisKeys.winners(), JSON.stringify(winners));
 
+    // Publish winner update for real-time leaderboard
+    await redis.publish(RedisKeys.leaderboardUpdates(), JSON.stringify({
+      type: 'winner',
+      prizeType: 'blackout',
+      playerId,
+      timestamp: Date.now(),
+    })).catch(() => {
+      // Silently fail if pub/sub not supported
+    });
+
     return NextResponse.json({
       success: true,
       isWinner: true,

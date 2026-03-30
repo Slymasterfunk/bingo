@@ -27,19 +27,7 @@ export const WINNING_PATTERNS: number[][] = [
  * Returns the type of win and the winning pattern
  */
 export function checkForWin(cardState: SquareState[]): WinResult {
-  // Check each pattern for a row/column/diagonal win
-  for (const pattern of WINNING_PATTERNS) {
-    const allMarked = pattern.every(index => cardState[index].marked);
-    if (allMarked) {
-      return {
-        hasRow: true,
-        hasBlackout: false,
-        winningPattern: pattern
-      };
-    }
-  }
-
-  // Check blackout (all 25 marked)
+  // Check blackout FIRST (all 25 marked) - highest priority
   const allMarked = cardState.every(square => square.marked);
   if (allMarked) {
     return {
@@ -47,6 +35,18 @@ export function checkForWin(cardState: SquareState[]): WinResult {
       hasBlackout: true,
       winningPattern: null
     };
+  }
+
+  // Then check each pattern for a row/column/diagonal win
+  for (const pattern of WINNING_PATTERNS) {
+    const patternMarked = pattern.every(index => cardState[index].marked);
+    if (patternMarked) {
+      return {
+        hasRow: true,
+        hasBlackout: false,
+        winningPattern: pattern
+      };
+    }
   }
 
   return { hasRow: false, hasBlackout: false, winningPattern: null };

@@ -78,7 +78,7 @@ export default function PlayPage() {
             Networking Bingo
           </h1>
           <p className="page-header__subtitle">
-            Alamo Tech Collective × Geeks && {'{...}'}
+            Geeks &amp;&amp; &#123;...&#125; | Alamo Tech Collective
           </p>
         </div>
 

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Winners, PlayerProgress } from '@/lib/types';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+// import { useRouter } from 'next/navigation';
 
 interface LeaderboardData {
   winners: Winners;
@@ -15,7 +16,7 @@ export default function AdminPage() {
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
+  // const router = useRouter();
 
   // Check if already authenticated
   useEffect(() => {
@@ -86,7 +87,6 @@ export default function AdminPage() {
           <form onSubmit={handleLogin} className="admin-login__form">
             <div>
               <label htmlFor="password" className="admin-login__label">
-                Password
               </label>
               <input
                 id="password"
@@ -94,6 +94,7 @@ export default function AdminPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="admin-login__input"
+                placeholder='password'
                 required
               />
             </div>
@@ -106,6 +107,9 @@ export default function AdminPage() {
             </button>
           </form>
         </div>
+          <p className="admin-login__footer-text">
+            Not an admin? <Link href="/" className="admin-login__link">Join the game</Link>
+          </p>
       </div>
     );
   }
@@ -123,7 +127,7 @@ export default function AdminPage() {
                 disabled={loading}
                 className="btn btn--blue"
               >
-                {loading ? 'Loading...' : '🔄 Refresh'}
+                {loading ? 'Loading...' : 'Refresh'}
               </button>
               <button
                 onClick={handleLogout}
@@ -143,13 +147,13 @@ export default function AdminPage() {
           </div>
           <div className="admin-stat-card">
             <p className="admin-stat-card__label">Rows Completed</p>
-            <p className="admin-stat-card__value admin-stat-card__value--yellow">
+            <p className="admin-stat-card__value">
               {data?.players.filter(p => p.hasRow).length || 0}
             </p>
           </div>
           <div className="admin-stat-card">
             <p className="admin-stat-card__label">Blackouts</p>
-            <p className="admin-stat-card__value admin-stat-card__value--purple">
+            <p className="admin-stat-card__value">
               {data?.players.filter(p => p.hasBlackout).length || 0}
             </p>
           </div>
@@ -202,7 +206,7 @@ export default function AdminPage() {
                       <td className="text-center"><span className="admin-players__score">{player.completedSquares}/25</span></td>
                       <td className="text-center">
                         <div className="admin-players__status">
-                          {player.hasRow && <span className="admin-players__badge admin-players__badge--yellow">Row</span>}
+                          {player.hasRow && <span className="admin-players__badge admin-players__badge--blue">Row</span>}
                           {player.hasBlackout && <span className="admin-players__badge admin-players__badge--purple">Blackout</span>}
                         </div>
                       </td>

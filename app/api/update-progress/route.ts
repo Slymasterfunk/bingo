@@ -46,6 +46,15 @@ export async function POST(request: Request) {
         score: completedSquares,
         member: playerId,
       }),
+      // Publish update event for real-time leaderboard (if pub/sub is supported)
+      redis.publish(RedisKeys.leaderboardUpdates(), JSON.stringify({
+        type: 'progress',
+        playerId,
+        timestamp: now,
+      })).catch(() => {
+        // Silently fail if pub/sub not supported (Upstash REST API limitation)
+        // SSE endpoint uses polling as fallback
+      }),
     ]);
 
     return NextResponse.json({ success: true });

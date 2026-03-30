@@ -38,4 +38,5 @@ export const RedisKeys = {
   winners: () => 'bingo:winners',
   player: (playerId: string) => `bingo:player:${playerId}`,
   leaderboard: () => 'bingo:leaderboard',
+  leaderboardUpdates: () => 'bingo:leaderboard:updates', // Pub/sub channel
 };
