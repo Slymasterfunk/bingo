@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
   // const router = useRouter();
 
   // Check if already authenticated
@@ -23,9 +24,70 @@ export default function AdminPage() {
     const auth = sessionStorage.getItem('adminAuth');
     if (auth === 'true') {
       setIsAuthenticated(true);
-      fetchData();
     }
   }, []);
+
+  // Connect to SSE for real-time updates when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
+
+    const connect = () => {
+      try {
+        eventSource = new EventSource('/api/leaderboard/stream');
+
+        eventSource.onopen = () => {
+          console.log('Admin SSE connection established');
+          setIsConnected(true);
+          setError('');
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+
+            if (message.type === 'initial' || message.type === 'update') {
+              setData(message.data);
+              setLoading(false);
+            }
+          } catch (err) {
+            console.error('Error parsing SSE message:', err);
+          }
+        };
+
+        eventSource.onerror = (err) => {
+          console.error('Admin SSE connection error:', err);
+          setIsConnected(false);
+          eventSource?.close();
+
+          // Attempt to reconnect after 5 seconds
+          reconnectTimeout = setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            connect();
+          }, 5000);
+        };
+      } catch (err) {
+        console.error('Error creating EventSource:', err);
+        setError('Failed to connect to real-time updates');
+        setLoading(false);
+      }
+    };
+
+    // Initial connection
+    connect();
+
+    // Cleanup on unmount or logout
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+    };
+  }, [isAuthenticated]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,7 +96,7 @@ export default function AdminPage() {
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD || password === 'admin123') {
       sessionStorage.setItem('adminAuth', 'true');
       setIsAuthenticated(true);
-      fetchData();
+      // SSE connection will auto-fetch data
     } else {
       setError('Invalid password');
     }
