@@ -81,7 +81,7 @@ export default function Home() {
 
         {/* Footer note */}
         <p className="sign-up__footer">
-          Have fun networking and may the best bingo player win! 🎉
+          Have fun networking and may the best bingo player win!
         </p>
       </main>
     </div>
