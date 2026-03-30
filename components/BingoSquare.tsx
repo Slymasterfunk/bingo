@@ -11,30 +11,26 @@ interface BingoSquareProps {
 export default function BingoSquare({ square, onClick, isWinning = false }: BingoSquareProps) {
   const isFreeSpace = square.prompt === "FREE SPACE";
 
+  // Build class names using BEM methodology
+  const classNames = [
+    'bingo-square',
+    isFreeSpace && 'bingo-square--free',
+    square.marked && 'bingo-square--marked',
+    isWinning && 'bingo-square--winning',
+  ].filter(Boolean).join(' ');
+
   return (
     <button
       onClick={onClick}
       disabled={isFreeSpace}
-      className={`
-        relative aspect-square p-2 rounded-lg border-2 transition-all duration-300
-        flex flex-col items-center justify-center text-center
-        min-h-[80px] sm:min-h-[100px]
-        ${isFreeSpace
-          ? 'bg-purple-500 text-white border-purple-600 cursor-default'
-          : square.marked
-            ? isWinning
-              ? 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-gray-900 border-yellow-600 shadow-lg'
-              : 'bg-gradient-to-br from-green-400 to-blue-500 text-white border-blue-600'
-            : 'bg-white hover:bg-gray-50 text-gray-800 border-gray-300 hover:border-gray-400 active:scale-95'
-        }
-      `}
+      className={classNames}
     >
-      <span className={`text-xs sm:text-sm font-medium ${isFreeSpace ? 'text-lg font-bold' : ''}`}>
+      <span className="bingo-square__prompt">
         {square.prompt}
       </span>
 
       {square.marked && square.personName && !isFreeSpace && (
-        <span className="mt-1 text-xs font-semibold truncate w-full px-1">
+        <span className="bingo-square__name">
           {square.personName}
         </span>
       )}

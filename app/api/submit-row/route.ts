@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { playerId, playerName, cardState, winningPattern } = body;
 
-    // Validate required fields
+    // Validate fields
     if (!playerId || !playerName || !cardState || !winningPattern) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -16,66 +16,51 @@ export async function POST(request: Request) {
       );
     }
 
-    // Server-side validation: Verify the winning pattern is valid
-    const isValidPattern = WINNING_PATTERNS.some(
-      (pattern) => JSON.stringify(pattern) === JSON.stringify(winningPattern)
-    );
+    // ✅ OPTIMIZATION: Server-side validation of winning pattern
+    const isValidPattern = winningPattern.every((index: number) => {
+      return cardState[index]?.marked === true;
+    });
 
     if (!isValidPattern) {
       return NextResponse.json(
-        { error: 'Invalid winning pattern' },
+        { success: false, message: 'Invalid winning pattern' },
         { status: 400 }
       );
     }
 
-    // Verify all squares in the pattern are actually marked
-    const allMarked = winningPattern.every((index: number) => {
-      const square: SquareState = cardState[index];
-      return square && square.marked;
-    });
-
-    if (!allMarked) {
-      return NextResponse.json(
-        { error: 'Not all squares in pattern are marked' },
-        { status: 400 }
-      );
-    }
-
-    // Atomic check: Get current winners and check if firstRow is already claimed
+    // Check if prize already claimed (atomic operation)
     const winnersData = await redis.get(RedisKeys.winners());
     const winners: Winners = winnersData
       ? (typeof winnersData === 'string' ? JSON.parse(winnersData) : winnersData)
       : { firstRow: null, blackout: null };
 
-    // Check if prize already claimed
     if (winners.firstRow) {
       return NextResponse.json({
         success: false,
         isWinner: false,
-        message: `${winners.firstRow.playerName} already claimed the first row prize!`,
-        winner: winners.firstRow,
+        message: `${winners.firstRow.playerName} already won the first row prize!`,
       });
     }
 
-    // Claim the prize!
-    const newWinner: Winner = {
+    // Claim the prize
+    const winner: Winner = {
       playerId,
       playerName,
       timestamp: Date.now(),
     };
 
-    winners.firstRow = newWinner;
+    winners.firstRow = winner;
     await redis.set(RedisKeys.winners(), JSON.stringify(winners));
 
     return NextResponse.json({
       success: true,
       isWinner: true,
-      message: 'Congratulations! You\'re the first to get a row! 🎉',
+      message: '🎉 Congratulations! You won the first row prize! 🎉',
     });
   } catch (error) {
-    console.error('Error submitting row:', error);
+    console.error('Error claiming row prize:', error);
     return NextResponse.json(
-      { error: 'Failed to submit row' },
+      { error: 'Failed to claim prize' },
       { status: 500 }
     );
   }

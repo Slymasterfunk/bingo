@@ -21,7 +21,7 @@ export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridPro
 
   const completedSquares = getCompletedSquares(gameState.cardState);
 
-  // Update progress on server whenever card state changes
+  // ✅ PERFORMANCE: Debounced progress updates (500ms delay to batch rapid changes)
   useEffect(() => {
     const updateProgress = async () => {
       try {
@@ -41,7 +41,10 @@ export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridPro
       }
     };
 
-    updateProgress();
+    // Debounce: wait 500ms after last change before updating
+    const timeoutId = setTimeout(updateProgress, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [completedSquares, gameState.playerId, gameState.playerName, gameState.hasClaimedRow, gameState.hasClaimedBlackout]);
 
   // Check for wins and claim prizes
@@ -84,7 +87,6 @@ export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridPro
         setTimeout(() => setShowCelebration(false), 8000);
         onUpdateGameState({ hasClaimedRow: true });
       } else if (data.success === false) {
-        // Someone else won
         setCelebrationMessage(`Nice try! ${data.message}`);
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 5000);
@@ -115,7 +117,6 @@ export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridPro
         setTimeout(() => setShowCelebration(false), 10000);
         onUpdateGameState({ hasClaimedBlackout: true });
       } else if (data.success === false) {
-        // Someone else won
         setCelebrationMessage(`Nice try! ${data.message}`);
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 5000);
@@ -152,28 +153,26 @@ export default function BingoGrid({ gameState, onUpdateGameState }: BingoGridPro
   const winningSquareIndices = new Set(winningPatterns.flat());
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4">
+    <div className="bingo-container">
       {/* Player name */}
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {gameState.playerName}
-        </h2>
-      </div>
+      <h2 className="player-name">
+        {gameState.playerName}
+      </h2>
 
       {/* Progress tracker */}
       <ProgressTracker completedSquares={completedSquares} totalSquares={25} />
 
       {/* Celebration message */}
       {showCelebration && (
-        <div className="mb-4 p-4 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg text-center animate-pulse">
-          <p className="text-xl font-bold text-gray-900">
+        <div className="celebration">
+          <p className="celebration__message">
             {celebrationMessage || '🎉 Congratulations! You got a line! 🎉'}
           </p>
         </div>
       )}
 
       {/* Bingo grid (5x5) */}
-      <div className="grid grid-cols-5 gap-2 mb-6">
+      <div className="bingo-grid">
         {gameState.cardState.map((square) => (
           <BingoSquare
             key={square.index}

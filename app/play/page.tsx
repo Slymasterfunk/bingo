@@ -60,24 +60,24 @@ export default function PlayPage() {
 
   if (isLoading || !gameState) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your bingo card...</p>
+      <div className="loading-screen">
+        <div className="loading-screen__content">
+          <div className="spinner"></div>
+          <p className="loading-screen__text">Loading your bingo card...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
-      <div className="container mx-auto">
+    <div className="play-page">
+      <div className="container">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+        <div className="page-header">
+          <h1 className="page-header__title">
             Networking Bingo
           </h1>
-          <p className="text-gray-600">
+          <p className="page-header__subtitle">
             Alamo Tech Collective × Geeks && {'{...}'}
           </p>
         </div>
@@ -86,10 +86,10 @@ export default function PlayPage() {
         <BingoGrid gameState={gameState} onUpdateGameState={handleUpdateGameState} />
 
         {/* Bottom actions */}
-        <div className="flex justify-center gap-4 mt-8">
+        <div className="game-actions">
           <Link
             href="/leaderboard"
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
+            className="btn btn--primary"
           >
             View Leaderboard
           </Link>
@@ -101,7 +101,7 @@ export default function PlayPage() {
                 router.push('/');
               }
             }}
-            className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="btn btn--secondary"
           >
             New Game
           </button>

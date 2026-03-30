@@ -2,31 +2,36 @@ import { NextResponse } from 'next/server';
 import { redis, RedisKeys } from '@/lib/redis';
 import { Winners, PlayerProgress } from '@/lib/types';
 
+// ✅ PERFORMANCE: Optimized with batch operations (MGET instead of loops)
 export async function GET() {
   try {
-    // Get winners
+    // Get winners (single operation)
     const winnersData = await redis.get(RedisKeys.winners());
     const winners: Winners = winnersData
       ? (typeof winnersData === 'string' ? JSON.parse(winnersData) : winnersData)
       : { firstRow: null, blackout: null };
 
-    // Get leaderboard (sorted by completed squares, descending)
+    // Get leaderboard IDs (single operation)
     const leaderboardIds = await redis.zrange(
       RedisKeys.leaderboard(),
       0,
       -1,
-      { rev: true } // Reverse order (highest scores first)
+      { rev: true } // Highest scores first
     ) as string[];
 
-    // Fetch player data for each ID in leaderboard
+    // ✅ OPTIMIZATION: Batch fetch all players at once with MGET
     const players: PlayerProgress[] = [];
-    for (const playerId of leaderboardIds) {
-      const playerData = await redis.get(RedisKeys.player(playerId));
-      if (playerData) {
-        const player: PlayerProgress = typeof playerData === 'string'
-          ? JSON.parse(playerData)
-          : playerData;
-        players.push(player);
+    if (leaderboardIds.length > 0) {
+      const playerKeys = leaderboardIds.map(id => RedisKeys.player(id));
+      const playerDataArray = await redis.mget(...playerKeys);
+
+      for (const playerData of playerDataArray) {
+        if (playerData) {
+          const player: PlayerProgress = typeof playerData === 'string'
+            ? JSON.parse(playerData)
+            : playerData;
+          players.push(player);
+        }
       }
     }
 

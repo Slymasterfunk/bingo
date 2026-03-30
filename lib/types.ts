@@ -38,7 +38,7 @@ export interface Winners {
 export interface PlayerProgress {
   playerId: string;
   playerName: string;
-  completedSquares: number;   // 0-24
+  completedSquares: number;   // 0-25
   hasRow: boolean;
   hasBlackout: boolean;
   lastUpdate: number;

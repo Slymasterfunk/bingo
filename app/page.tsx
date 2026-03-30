@@ -7,7 +7,7 @@ export default function Home() {
   const [playerName, setPlayerName] = useState('');
   const router = useRouter();
 
-  const handleStart = (e: React.FormEvent) => {
+  const handleStart = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (playerName.trim()) {
       // Store player name in sessionStorage for the /play page to pick up
@@ -17,49 +17,45 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <main className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8 md:p-12">
+    <div className="sign-up">
+      <main>
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Networking Bingo
-          </h1>
-          <p className="text-xl text-gray-600 mb-2">
-            Alamo Tech Collective × Geeks && {'{...}'}
-          </p>
+        <div className="sign-up__header">
+          <h1>Networking Bingo</h1>
+          <p>Geeks &amp;&amp; &#123;...&#125; | Alamo Tech Collective</p>
         </div>
 
         {/* Instructions */}
-        <div className="bg-blue-50 rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">How to Play:</h2>
-          <ol className="space-y-2 text-gray-700">
-            <li className="flex items-start">
-              <span className="font-bold mr-2">1.</span>
+        <div className="sign-up__instructions">
+          <h2>How to Play:</h2>
+          <ol>
+            <li>
+              <span className="number">1.</span>
               <span>Enter your name and start playing</span>
             </li>
-            <li className="flex items-start">
-              <span className="font-bold mr-2">2.</span>
+            <li>
+              <span className="number">2.</span>
               <span>Meet people who match the prompts on your bingo card</span>
             </li>
-            <li className="flex items-start">
-              <span className="font-bold mr-2">3.</span>
+            <li>
+              <span className="number">3.</span>
               <span>Tap a square and enter their name to mark it complete</span>
             </li>
-            <li className="flex items-start">
-              <span className="font-bold mr-2">4.</span>
+            <li>
+              <span className="number">4.</span>
               <span>Get 5 in a row (horizontal, vertical, or diagonal) to win!</span>
             </li>
-            <li className="flex items-start">
-              <span className="font-bold mr-2">5.</span>
+            <li>
+              <span className="number">5.</span>
               <span>Complete ALL squares for a blackout bonus!</span>
             </li>
           </ol>
         </div>
 
         {/* Start form */}
-        <form onSubmit={handleStart} className="space-y-6">
-          <div>
-            <label htmlFor="player-name" className="block text-sm font-medium text-gray-700 mb-2">
+        <form onSubmit={handleStart} className="sign-up__form">
+          <div className="sign-up__form-group">
+            <label htmlFor="player-name" className="sign-up__label">
               Enter Your Name:
             </label>
             <input
@@ -68,7 +64,7 @@ export default function Home() {
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               placeholder="e.g., Alex Johnson"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-lg"
+              className="sign-up__input"
               autoComplete="name"
               required
             />
@@ -77,14 +73,14 @@ export default function Home() {
           <button
             type="submit"
             disabled={!playerName.trim()}
-            className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95"
+            className="btn btn--primary btn--lg btn--full"
           >
             Start Playing
           </button>
         </form>
 
         {/* Footer note */}
-        <p className="text-center text-sm text-gray-500 mt-8">
+        <p className="sign-up__footer">
           Have fun networking and may the best bingo player win! 🎉
         </p>
       </main>

@@ -28,7 +28,7 @@ export default function NameInputModal({
     }
   }, [isOpen, currentName]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (name.trim()) {
       onSubmit(name.trim());
@@ -45,17 +45,15 @@ export default function NameInputModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4 text-gray-900">
+    <div className="name-modal" onClick={handleBackdropClick}>
+      <div className="name-modal__backdrop"></div>
+      <div className="name-modal__content">
+        <h2 className="name-modal__header">
           {prompt}
         </h2>
 
         <form onSubmit={handleSubmit}>
-          <label htmlFor="person-name" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="person-name" className="admin-login__label">
             Enter their name:
           </label>
           <input
@@ -64,23 +62,23 @@ export default function NameInputModal({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            className="name-modal__input"
             placeholder="e.g., John Doe"
             autoComplete="off"
           />
 
-          <div className="flex gap-3 mt-6">
+          <div className="name-modal__actions">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="btn btn--secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!name.trim()}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="btn btn--blue"
             >
               {currentName ? 'Update' : 'Mark Complete'}
             </button>

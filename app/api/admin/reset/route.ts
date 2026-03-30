@@ -1,39 +1,39 @@
 import { NextResponse } from 'next/server';
 import { redis, RedisKeys } from '@/lib/redis';
 
+// ✅ PERFORMANCE: Lightweight reset with batch operations
 export async function POST() {
   try {
     // Get all player IDs from leaderboard
-    const playerIds = await redis.zrange(
+    const leaderboardIds = await redis.zrange(
       RedisKeys.leaderboard(),
       0,
       -1
     ) as string[];
 
+    // ✅ OPTIMIZATION: Batch delete operations
+    const deletePromises = [];
+
     // Delete all player data
-    const deletePromises = playerIds.map(playerId =>
-      redis.del(RedisKeys.player(playerId))
-    );
+    for (const playerId of leaderboardIds) {
+      deletePromises.push(redis.del(RedisKeys.player(playerId)));
+    }
+
+    // Delete leaderboard and winners
+    deletePromises.push(redis.del(RedisKeys.leaderboard()));
+    deletePromises.push(redis.del(RedisKeys.winners()));
+
     await Promise.all(deletePromises);
-
-    // Delete leaderboard
-    await redis.del(RedisKeys.leaderboard());
-
-    // Reset winners
-    await redis.set(RedisKeys.winners(), JSON.stringify({
-      firstRow: null,
-      blackout: null,
-    }));
 
     return NextResponse.json({
       success: true,
-      message: 'Game data has been reset',
-      deletedPlayers: playerIds.length,
+      message: 'Game data reset successfully',
+      deletedPlayers: leaderboardIds.length,
     });
   } catch (error) {
-    console.error('Error resetting game data:', error);
+    console.error('Error resetting game:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to reset game data' },
+      { error: 'Failed to reset game data' },
       { status: 500 }
     );
   }
